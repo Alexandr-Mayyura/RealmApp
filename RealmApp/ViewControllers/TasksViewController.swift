@@ -74,28 +74,27 @@ class TasksViewController: UITableViewController {
         let doneAction = UIContextualAction(style: .normal, title: "Done") { _, _, isDone in
             StorageManager.shared.done(task, isComplete: true)
             
-            tableView.reloadSections(IndexSet(integersIn: 0...1), with: .automatic)
+            tableView.reloadSections([0, 1], with: .automatic)
             isDone(true)
         }
         
-        let unDoneAction = UIContextualAction(style: .normal, title: "Undone") { _, _, isDone in
+        let undoneAction = UIContextualAction(style: .normal, title: "Undone") { _, _, isDone in
             StorageManager.shared.done(task, isComplete: false)
             
-            tableView.reloadSections(IndexSet(integersIn: 0...1), with: .automatic)
+            tableView.reloadSections([0, 1], with: .automatic)
             isDone(true)
         }
         
-        unDoneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+        undoneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         editAction.backgroundColor = .orange
         doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         
         if indexPath.section == 0 {
             return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
         } else {
-            return UISwipeActionsConfiguration(actions: [unDoneAction, editAction, deleteAction])
+            return UISwipeActionsConfiguration(actions: [undoneAction, editAction, deleteAction])
         }
     }
-    
     
     @objc private func addButtonPressed() {
         showAlert()
