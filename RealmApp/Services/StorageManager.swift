@@ -38,7 +38,6 @@ class StorageManager {
             } else if let task = data as? Task {
                 realm.delete(task)
             }
-            
         }
     }
     
