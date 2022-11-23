@@ -45,16 +45,20 @@ class StorageManager {
         write {
             if let taskList = data as? TaskList {
                 taskList.name = newValue
-            } else  if let task = data as? Task {
+            } else if let task = data as? Task {
                 task.name = newValue
                 task.note = note ?? ""
             }
         }
     }
 
-    func done<T: Object>(_ taskList: T, isComplete: Bool) {
+    func done<T: Object>(_ data: T, isComplete: Bool) {
         write {
-            taskList.setValue(isComplete, forKey: "isComplete")
+            if let taskList = data as? TaskList {
+                taskList.tasks.setValue(isComplete, forKey: "isComplete")
+            } else if let task = data as? Task {
+                task.setValue(isComplete, forKey: "isComplete")
+            }
         }
     }
 
