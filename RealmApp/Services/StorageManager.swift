@@ -30,35 +30,22 @@ class StorageManager {
         }
     }
     
-    func delete<T: Object>(_ data: T) {
+    func delete(_ taskList: TaskList) {
         write {
-            if let taskList = data as? TaskList {
-                realm.delete(taskList.tasks)
-                realm.delete(taskList)
-            } else if let task = data as? Task {
-                realm.delete(task)
-            }
+            realm.delete(taskList.tasks)
+            realm.delete(taskList)
         }
     }
     
-    func edit<T: Object>(_ data: T, newValue: String, withNote note: String? = nil) {
+    func edit(_ taskList: TaskList, newValue: String) {
         write {
-            if let taskList = data as? TaskList {
-                taskList.name = newValue
-            } else if let task = data as? Task {
-                task.name = newValue
-                task.note = note ?? ""
-            }
+            taskList.name = newValue
         }
     }
 
-    func done<T: Object>(_ data: T, isComplete: Bool) {
+    func done(_ taskList: TaskList) {
         write {
-            if let taskList = data as? TaskList {
-                taskList.tasks.setValue(isComplete, forKey: "isComplete")
-            } else if let task = data as? Task {
-                task.setValue(isComplete, forKey: "isComplete")
-            }
+            taskList.tasks.setValue(true, forKey: "isComplete")
         }
     }
 
@@ -71,13 +58,32 @@ class StorageManager {
         }
     }
     
+    func delete(_ task: Task) {
+        write {
+            realm.delete(task)
+        }
+    }
+    
+    func rename(_ task: Task, to name: String, withNote note: String) {
+        write {
+            task.name = name
+            task.note = note
+        }
+    }
+    
+    func done(_ task: Task) {
+        write {
+            task.isComplete.toggle()
+        }
+    }
+    
     private func write(completion: () -> Void) {
         do {
             try realm.write {
                 completion()
             }
-        } catch let error {
-            print(error.localizedDescription)
+        } catch {
+            print(error)
         }
     }
 }

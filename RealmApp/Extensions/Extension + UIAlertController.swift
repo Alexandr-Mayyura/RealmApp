@@ -1,9 +1,9 @@
 //
-//  AlertController.swift
+//  Extension + UIAlertController.swift
 //  RealmApp
 //
-//  Created by Alexey Efimov on 12.03.2020.
-//  Copyright © 2020 Alexey Efimov. All rights reserved.
+//  Created by Aleksandr Mayyura on 27.11.2022.
+//  Copyright © 2022 Alexey Efimov. All rights reserved.
 //
 
 import UIKit
@@ -65,3 +65,4 @@ extension UIAlertController {
         }
     }
 }
+

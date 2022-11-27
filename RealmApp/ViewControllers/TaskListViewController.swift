@@ -39,19 +39,8 @@ class TaskListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskListCell", for: indexPath)
-        var content = cell.defaultContentConfiguration()
         let taskList = taskLists[indexPath.row]
-        content.text = taskList.name
-        let currentTasks = taskList.tasks.filter("isComplete = false")
-        let completedTasks = taskList.tasks.filter("isComplete = true")
-        
-        if  currentTasks.isEmpty && !completedTasks.isEmpty {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-            content.secondaryText = "\(currentTasks.count)"
-        }
-        cell.contentConfiguration = content
+        cell.configure(with: taskList)
         return cell
     }
     
@@ -72,7 +61,7 @@ class TaskListViewController: UITableViewController {
         }
         
         let doneAction = UIContextualAction(style: .normal, title: "Done") { _, _, isDone in
-            StorageManager.shared.done(taskList, isComplete: true)
+            StorageManager.shared.done(taskList)
             tableView.reloadRows(at: [indexPath], with: .automatic)
             isDone(true)
         }
@@ -90,16 +79,13 @@ class TaskListViewController: UITableViewController {
         let taskList = taskLists[indexPath.row]
         tasksVC.taskList = taskList
     }
-
+    
     @IBAction func sortingList(_ sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0:
-            taskLists = taskLists.sorted(byKeyPath: "date", ascending: true)
-            tableView.reloadData()
-        default:
-            taskLists = taskLists.sorted(byKeyPath: "name", ascending: true)
-            tableView.reloadData()
-        }
+        taskLists = sender.selectedSegmentIndex == 0
+            ? taskLists.sorted(byKeyPath: "date")
+            : taskLists.sorted(byKeyPath: "name")
+        tableView.reloadData()
+        
     }
     
     @objc private func addButtonPressed() {
@@ -107,11 +93,8 @@ class TaskListViewController: UITableViewController {
     }
     
     private func createTempData() {
-        if !UserDefaults.standard.bool(forKey: "done") {
-            DataManager.shared.createTempData { [unowned self] in
-                UserDefaults.standard.set(true, forKey: "done")
-                tableView.reloadData()
-            }
+        DataManager.shared.createTempData { [unowned self] in
+            tableView.reloadData()
         }
     }
 }

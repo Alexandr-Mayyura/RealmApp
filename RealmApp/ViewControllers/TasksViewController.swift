@@ -15,7 +15,7 @@ class TasksViewController: UITableViewController {
     
     private var currentTasks: Results<Task>!
     private var completedTasks: Results<Task>!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = taskList.name
@@ -64,42 +64,41 @@ class TasksViewController: UITableViewController {
         }
         
         let editAction = UIContextualAction(style: .normal, title: "Edit") { [unowned self] _, _, isDone in
-            showAlert(with: task)
-            {
+            showAlert(with: task) {
                 tableView.reloadRows(at: [indexPath], with: .automatic)
             }
             isDone(true)
         }
         
-        let doneAction = UIContextualAction(style: .normal, title: "Done") { _, _, isDone in
-            StorageManager.shared.done(task, isComplete: true)
+        let doneTitle = indexPath.section == 0 ? "Done" : "Undone"
+        
+        let doneAction = UIContextualAction(style: .normal, title: doneTitle) { [weak self] _, _, isDone in
+            StorageManager.shared.done(task)
+            let currentTaskIndex = IndexPath(
+                row: self?.currentTasks.index(of: task) ?? 0,
+                section: 0
+            )
+            let completedTaskIndex = IndexPath(
+                row: self?.completedTasks.index(of: task) ?? 0,
+                section: 1
+            )
+            let destinationIndexRow = indexPath.section == 0
+            ? completedTaskIndex
+            : currentTaskIndex
             
-            tableView.reloadSections([0, 1], with: .automatic)
+            tableView.moveRow(at: indexPath, to: destinationIndexRow)
             isDone(true)
         }
         
-        let undoneAction = UIContextualAction(style: .normal, title: "Undone") { _, _, isDone in
-            StorageManager.shared.done(task, isComplete: false)
-            
-            tableView.reloadSections([0, 1], with: .automatic)
-            isDone(true)
-        }
-        
-        undoneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         editAction.backgroundColor = .orange
         doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         
-        if indexPath.section == 0 {
-            return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
-        } else {
-            return UISwipeActionsConfiguration(actions: [undoneAction, editAction, deleteAction])
-        }
+        return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
     }
     
     @objc private func addButtonPressed() {
         showAlert()
     }
-
 }
 
 extension TasksViewController {
@@ -108,16 +107,14 @@ extension TasksViewController {
         
         let alert = UIAlertController.createAlert(withTitle: title, andMessage: "What do you want to do?")
         
-        alert.action(with: task) { [weak self] taskTitle, note in
-           
-                if let task = task, let completion = completion {
-                    StorageManager.shared.edit(task, newValue: taskTitle, withNote: note)
-                    completion()
+        alert.action(with: task) { [weak self] newValue, note in
+            if let task = task, let completion = completion {
+                StorageManager.shared.rename(task, to: newValue, withNote: note)
+                completion()
             } else {
-                self?.save(task: taskTitle, withNote: note)
+                self?.save(task: newValue, withNote: note)
             }
         }
-        
         present(alert, animated: true)
     }
     
